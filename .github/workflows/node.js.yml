@@ -21,14 +21,13 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
-      working-directory: ./frontend
 
     - name: Setup Node.js
       uses: actions/setup-node@v3
-      working-directory: ./frontend
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
+        cache-dependency-path: '**/package-lock.json'
 
     - name: Test frontend
       working-directory: ./frontend
