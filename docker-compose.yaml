@@ -11,5 +11,18 @@ services:
       - postgres:/var/lib/postgresql/data
     ports:
       - '5432:5432'
+  backend:
+    build:
+      context: backend
+      dockerfile: Dockerfile
+    environment:
+      - DATABASE_URL=postgresql://hoteldbuser:hoteldbpassword@postgres:5432/hoteldb?schema=public
+    ports:
+      - "9090:9090"
+    depends_on:
+      - postgres
+    links:
+      - postgres
+    entrypoint: ./docker-entrypoint.sh
 volumes:
   postgres:
