@@ -60,8 +60,32 @@ export const resolvers = {
                 throw new Error('ROOM_NOT_FOUND');
             }
         
-            if (roomToBook.booked) {
-                throw new Error('ROOM_ALREADY_BOOKED');
+            const existingBooking = await prisma.booking.findFirst({
+                where: {
+                    roomId: args.roomId,
+                    OR: [
+                        {
+                            startDate: {
+                                lte: args.endDate
+                            },
+                            endDate: {
+                                gte: args.startDate
+                            }
+                        },
+                        {
+                            startDate: {
+                                gte: args.startDate
+                            },
+                            endDate: {
+                                lte: args.endDate
+                            }
+                        }
+                    ]
+                }
+            });
+        
+            if (existingBooking) {
+                throw new Error('ROOM_NOT_AVAILABLE_FOR_SPECIFIED_DATES');
             }
         
             let newBooking;
@@ -75,16 +99,12 @@ export const resolvers = {
                     }
                 });
         
-                await prisma.room.update({
-                    where: { id: args.roomId },
-                    data: { booked: true }
-                });
             } catch (e) {
                 throw new Error('DATABASE_ERROR');
             }
         
             return newBooking;
-        },
+        },        
         
         register: async (_: any, args: { email: string, password: string, fullName?: string, role: UserRole }, context: Context): Promise<AuthPayload> => {
     
