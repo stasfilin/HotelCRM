@@ -13,5 +13,12 @@
 			]
 		}
 	},
-	"remoteUser": "node"
+	"forwardPorts": [1234, 5678],
+	"remoteUser": "node",
+
+	"runArgs": ["--init", "--privileged"],
+	"overrideCommand": false,
+	"features": {
+		"ghcr.io/devcontainers/features/docker-in-docker:2": {}
+	}
 }
