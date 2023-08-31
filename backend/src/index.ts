@@ -2,33 +2,35 @@ import { ApolloServer, AuthenticationError } from 'apollo-server';
 import jwt from 'jsonwebtoken';
 import { resolvers } from './resolvers';
 import {typeDefs} from './graphql/schema'
-import {JWT_SECRET, PORT} from './config'
+import {JWT_SECRET, port} from './config'
 
 const server = new ApolloServer({
     typeDefs,
     resolvers,
     context: ({ req }) => {
-        const token = req.headers.authorization || '';
+        const authHeader = req.headers.authorization || '';
+        const token = authHeader.startsWith('Bearer ') ? authHeader.substring(7) : null;
+
+        if (!token) {
+            return {};
+        }
 
         try {
-            if (token) {
-                const user = jwt.verify(token, JWT_SECRET) as any; 
-                return { user };
-            }
+            const user = jwt.verify(token, JWT_SECRET) as any; 
+            return { user };
         } catch (err) {
             if (err instanceof Error) {
                 console.error('Failed to verify token:', err.message);
-                throw new AuthenticationError('You must be logged in');
+                throw new AuthenticationError('Your session is not valid. Please log in again.');
             }
             throw err;
         }
-
-        return {};
     },
     debug: false
 });
 
-server.listen({ PORT })
+
+server.listen({ port })
     .then(({ url }) => {
         console.log(`Server runs at: ${url}`);
     })

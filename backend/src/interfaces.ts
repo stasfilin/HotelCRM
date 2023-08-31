@@ -1,24 +1,36 @@
+export enum RoomType {
+    SINGLE = "SINGLE",
+    DOUBLE = "DOUBLE",
+    SUITE = "SUITE",
+    DELUXE = "DELUXE"
+}
+
+export enum UserRole {
+    CUSTOMER = "CUSTOMER",
+    ADMIN = "ADMIN"
+  }
+
 export interface Room {
-    id: string;
-    type: string;
+    id: number;
+    type: RoomType;
     price: number;
     booked: boolean;
 }
   
 export interface User {
-    id: string;
+    id: number;
     email: string;
     password: string;
-    fullName?: string;
-    role: string;
+    fullName?: string | null;
+    role: UserRole;
 }
   
 export interface Booking {
-    id: string;
-    roomId: string;
-    userId: string;
-    startDate: string;
-    endDate: string;
+    id: number;
+    roomId: number;
+    userId: number;
+    startDate: Date;
+    endDate: Date;
 }
   
 export interface AuthPayload {

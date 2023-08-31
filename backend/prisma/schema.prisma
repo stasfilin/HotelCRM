@@ -20,28 +20,28 @@ enum UserRole {
 }
 
 model Room {
-  id    Int      @id @default(autoincrement())
-  type  RoomType
-  price Float
-  booked Boolean @default(false)
-  bookings Booking[]
+  id      Int      @id @default(autoincrement())
+  type    RoomType 
+  price   Float
+  booked  Boolean  
+  bookings Booking[] 
 }
 
 model User {
-  id        Int       @id @default(autoincrement())
-  email     String    @unique
-  password  String
-  fullName  String?
-  role      UserRole
-  bookings  Booking[]
+  id       Int       @id @default(autoincrement())
+  email    String    @unique
+  password String
+  fullName String?
+  role     UserRole 
+  bookings Booking[]
 }
 
 model Booking {
-  id        Int      @id @default(autoincrement())
-  startDate String
-  endDate   String
+  id        Int       @id @default(autoincrement())
+  startDate DateTime
+  endDate   DateTime
   roomId    Int
-  room      Room     @relation(fields: [roomId], references: [id])
+  room      Room      @relation(fields: [roomId], references: [id])
   userId    Int
-  user      User     @relation(fields: [userId], references: [id])
+  user      User      @relation(fields: [userId], references: [id])
 }

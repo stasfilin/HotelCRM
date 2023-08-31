@@ -1,97 +1,146 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import {Room, User, Booking, Context, AuthPayload, } from './interfaces';
-
-import { rooms, users, bookings } from './database';
+import { prisma } from './database';
+import { Room, User, Booking, Context, AuthPayload, UserRole, RoomType } from './interfaces';
 import { JWT_SECRET } from './config';
+import { ApolloError, UserInputError, AuthenticationError } from 'apollo-server';
 
 const SALT_ROUNDS = 10;
 
 export const resolvers = {
     Room: {
-        id: (parent: Room): string => parent.id,
-        type: (parent: Room): string => parent.type,
-        price: (parent: Room): number => parent.price,
-        booked: (parent: Room): boolean => parent.booked,
+        id: (parent: Room) => parent.id,
+        type: (parent: Room): RoomType => {
+            if (!Object.values(RoomType).includes(parent.type)) {
+                throw new Error('Invalid room type.');
+            }
+            return parent.type;
+        },
+        price: (parent: Room) => parent.price,
+        booked: (parent: Room) => parent.booked,
     },
 
     User: {
-        id: (parent: User): string => parent.id,
-        email: (parent: User): string => parent.email,
-        fullName: (parent: User): string | undefined => parent.fullName,
-        bookings: (parent: User): Booking[] => bookings.filter((booking: Booking) => booking.userId === parent.id),
-        role: (parent: User): string => parent.role,
+        id: (parent: User) => parent.id,
+        email: (parent: User) => parent.email,
+        fullName: (parent: User) => parent.fullName,
+        bookings: (parent: User) => prisma.booking.findMany({ where: { userId: parent.id } }),
+        role: (parent: User): UserRole => {
+            if (!Object.values(UserRole).includes(parent.role)) {
+                throw new Error('Invalid user role.');
+            }
+            return parent.role;
+        },
     },
 
     Booking: {
-        id: (parent: Booking): string => parent.id,
-        roomId: (parent: Booking): string => parent.roomId,
-        userId: (parent: Booking): string => parent.userId,
-        startDate: (parent: Booking): string => parent.startDate,
-        endDate: (parent: Booking): string => parent.endDate,
+        id: (parent: Booking) => parent.id,
+        roomId: (parent: Booking) => parent.roomId,
+        userId: (parent: Booking) => parent.userId,
+        startDate: (parent: Booking) => parent.startDate,
+        endDate: (parent: Booking) => parent.endDate,
     },
 
     Query: {
-        availableRooms: (): Room[] => rooms.filter((room: Room) => !room.booked),
-        bookings: (): Booking[] => bookings,
-        booking: (parent: unknown, args: { id: string }): Booking | undefined => bookings.find((booking: Booking) => booking.id === args.id),
-        users: (): User[] => users,
-        user: (parent: unknown, args: { id: string }): User | undefined => users.find((user: User) => user.id === args.id),
-        userBookings: (parent: unknown, args: { userId: string }): Booking[] => bookings.filter((booking: Booking) => booking.userId === args.userId),
+        availableRooms: () => prisma.room.findMany({ where: { booked: false } }),
+        bookings: () => prisma.booking.findMany(),
+        booking: (_: any, args: { id: number }) => prisma.booking.findFirst({ where: { id: args.id } }),
+        users: () => prisma.user.findMany(),
+        user: (_: any, args: { id: number }) => prisma.user.findFirst({ where: { id: args.id } }),
     },
 
     Mutation: {
-        bookRoom: (parent: unknown, args: { userId: string, roomId: string, startDate: string, endDate: string }, context: Context): Booking => {
+        bookRoom: async (_: any, args: { userId: number, roomId: number, startDate: Date, endDate: Date }, context: Context) => {
             if (!context.user) {
-                throw new Error('You must be logged in to book a room');
+                throw new Error('UNAUTHENTICATED');
             }
-
-            const newBooking: Booking = {
-                id: `${bookings.length + 1}`,
-                roomId: args.roomId,
-                userId: context.user.id,
-                startDate: args.startDate,
-                endDate: args.endDate,
-            };
-            bookings.push(newBooking);
-
-            const roomToBook = rooms.find((room: Room) => room.id === args.roomId);
-            if (roomToBook) {
-                roomToBook.booked = true;
+        
+            const roomToBook = await prisma.room.findFirst({ where: { id: args.roomId } });
+            if (!roomToBook) {
+                throw new Error('ROOM_NOT_FOUND');
             }
-
+        
+            if (roomToBook.booked) {
+                throw new Error('ROOM_ALREADY_BOOKED');
+            }
+        
+            let newBooking;
+            try {
+                newBooking = await prisma.booking.create({
+                    data: {
+                        roomId: args.roomId,
+                        userId: context.user.id,
+                        startDate: args.startDate,
+                        endDate: args.endDate,
+                    }
+                });
+        
+                await prisma.room.update({
+                    where: { id: args.roomId },
+                    data: { booked: true }
+                });
+            } catch (e) {
+                throw new Error('DATABASE_ERROR');
+            }
+        
             return newBooking;
-        },        
-
-        register: async (parent: unknown, args: { email: string, password: string, fullName?: string, role: string }): Promise<AuthPayload> => {
+        },
+        
+        register: async (_: any, args: { email: string, password: string, fullName?: string, role: UserRole }, context: Context): Promise<AuthPayload> => {
+    
+            if (args.role === UserRole.ADMIN) {
+                if (!context.user) {
+                    throw new Error('UNAUTHORIZED');
+                }
+        
+                if (context.user.role !== UserRole.ADMIN) {
+                    throw new Error('INSUFFICIENT_PERMISSIONS');
+                }
+            }
+            
+            if (!Object.values(UserRole).includes(args.role)) {
+                throw new Error('INVALID_ROLE');
+            }
+        
+            const existingUser = await prisma.user.findFirst({ where: { email: args.email } });
+            if (existingUser) {
+                throw new Error("EMAIL_IN_USE");
+            }
+        
             const hashedPassword = await bcrypt.hash(args.password, SALT_ROUNDS);
-            const newUser: User = {
-                id: `${users.length + 1}`,
-                email: args.email,
-                password: hashedPassword,
-                fullName: args.fullName,
-                role: args.role,
-            };
-            users.push(newUser);
-
+        
+            const newUser = await prisma.user.create({
+                data: {
+                    email: args.email,
+                    password: hashedPassword,
+                    fullName: args.fullName,
+                    role: args.role,
+                }
+            });
+        
             const token = jwt.sign({ userId: newUser.id, email: newUser.email }, JWT_SECRET, {
                 expiresIn: "1d"
             });
+        
             return {
                 token,
-                user: newUser,
+                user: {
+                    ...newUser,
+                    role: newUser.role as UserRole
+                }
             };
         },
-        
-        login: async (parent: unknown, args: { email: string, password: string }): Promise<AuthPayload> => {
-            const user = users.find((u: User) => u.email === args.email);
+
+        login: async (_: any, args: { email: string, password: string }): Promise<AuthPayload> => {
+            const user = await prisma.user.findFirst({ where: { email: args.email } });
+            
             if (!user) {
-                throw new Error("Invalid email or password.");
+                throw new Error("INVALID_CREDENTIALS");
             }
 
             const passwordValid = await bcrypt.compare(args.password, user.password);
             if (!passwordValid) {
-                throw new Error("Invalid email or password.");
+                throw new Error("INVALID_CREDENTIALS");
             }
 
             const token = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET, {
@@ -100,8 +149,12 @@ export const resolvers = {
 
             return {
                 token,
-                user,
+                user: {
+                    ...user,
+                    role: user.role as UserRole
+                }
             };
-        },        
+        },
+
     },
 }
