@@ -1,18 +1,12 @@
 {
 	"name": "HotelCRM",
-	"image": "mcr.microsoft.com/devcontainers/universal:2",
+	"image": "mcr.microsoft.com/devcontainers/base:jammy",
 	"features": {
-		"ghcr.io/devcontainers/features/docker-in-docker:2": {}
+		"ghcr.io/devcontainers/features/node:1": {
+			"version": "20"
+		},
+		"ghcr.io/devcontainers/features/docker-in-docker:2": {},
+		"ghcr.io/devcontainers-contrib/features/typescript:2": {}
 	},
-	"runArgs": ["--privileged"],
-	"mounts": [
-	  "type=bind,src=/var/run/docker.sock,dst=/var/run/docker.sock"
-	],
-	"customizations": {
-	  "vscode": {
-		"extensions": [
-		  "ms-azuretools.vscode-docker"
-		]
-	  }
-	}
-  }
+	"postCreateCommand": "uname -a"
+}
