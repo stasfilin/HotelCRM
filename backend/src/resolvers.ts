@@ -52,12 +52,12 @@ export const resolvers = {
             if (!context.user) {
                 throw new Error('UNAUTHENTICATED');
             }
-        
+
             const roomToBook = await prisma.room.findFirst({ where: { id: args.roomId } });
             if (!roomToBook) {
                 throw new Error('ROOM_NOT_FOUND');
             }
-        
+
             const existingBooking = await prisma.booking.findFirst({
                 where: {
                     roomId: args.roomId,
@@ -81,11 +81,11 @@ export const resolvers = {
                     ]
                 }
             });
-        
+
             if (existingBooking) {
                 throw new Error('ROOM_NOT_AVAILABLE_FOR_SPECIFIED_DATES');
             }
-        
+
             let newBooking;
             try {
                 newBooking = await prisma.booking.create({
@@ -96,37 +96,37 @@ export const resolvers = {
                         endDate: args.endDate,
                     }
                 });
-        
+
             } catch (e) {
                 throw new Error('DATABASE_ERROR');
             }
-        
+
             return newBooking;
-        },        
-        
+        },
+
         register: async (_: any, args: { email: string, password: string, fullName?: string, role: UserRole }, context: Context): Promise<AuthPayload> => {
-    
+
             if (args.role === UserRole.ADMIN) {
                 if (!context.user) {
                     throw new Error('UNAUTHORIZED');
                 }
-        
+
                 if (context.user.role !== UserRole.ADMIN) {
                     throw new Error('INSUFFICIENT_PERMISSIONS');
                 }
             }
-            
+
             if (!Object.values(UserRole).includes(args.role)) {
                 throw new Error('INVALID_ROLE');
             }
-        
+
             const existingUser = await prisma.user.findFirst({ where: { email: args.email } });
             if (existingUser) {
                 throw new Error("EMAIL_IN_USE");
             }
-        
+
             const hashedPassword = await bcrypt.hash(args.password, SALT_ROUNDS);
-        
+
             const newUser = await prisma.user.create({
                 data: {
                     email: args.email,
@@ -135,11 +135,11 @@ export const resolvers = {
                     role: args.role,
                 }
             });
-        
+
             const token = jwt.sign({ userId: newUser.id, email: newUser.email }, JWT_SECRET, {
                 expiresIn: "1d"
             });
-        
+
             return {
                 token,
                 user: {
@@ -156,7 +156,7 @@ export const resolvers = {
             } catch (err) {
                 if (err instanceof PrismaClientKnownRequestError) {
                     console.error('Prisma error:', err.message);
-                    
+
                     if (err.code === "P2021") {
                         console.error('It seems the User table is missing in the database.');
                     }
@@ -169,15 +169,15 @@ export const resolvers = {
                 throw new Error("INVALID_CREDENTIALS");
             }
             const passwordValid = await bcrypt.compare(args.password, user.password);
-            
+
             if (!passwordValid) {
                 throw new Error("INVALID_CREDENTIALS");
             }
-        
+
             const token = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET, {
                 expiresIn: "1d"
             });
-        
+
             return {
                 token,
                 user: {
