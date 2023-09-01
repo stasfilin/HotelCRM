@@ -1,10 +1,18 @@
+import React, { useEffect } from 'react';
 import { useMutation } from "@apollo/client";
 import { LOGIN_MUTATION } from "./graph";
-import { encryptData } from "./utils/auth";
-
+import { isLoggedIn } from "./utils/auth";
+import { useNavigate } from 'react-router-dom';
 
 export const LoginPage: React.FC = () => {
     const [login, { loading, error, data }] = useMutation(LOGIN_MUTATION);
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (isLoggedIn()) {
+            navigate('/');
+        }
+    }, [navigate]);
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -15,12 +23,10 @@ export const LoginPage: React.FC = () => {
         try {
             const { data } = await login({ variables: { email, password } });
 
-            console.log(data);
-
             localStorage.setItem('token', data.login.token);
-            localStorage.setItem('user', encryptData(JSON.stringify(data.login.user)));
 
-            alert('Login successful!');
+            navigate('/');
+
         } catch (err) {
             alert('Error logging in. Please try again.');
         }

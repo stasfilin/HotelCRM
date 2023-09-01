@@ -1,23 +1,35 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   BrowserRouter as Router,
   Route,
   Routes,
-  Link
+  Link,
+  useNavigate
 } from 'react-router-dom';
 import './App.css';
 
-import { LoginPage } from './LoginPage'
+import { LoginPage } from './LoginPage';
 import { client } from './apolloClient';
 import { ApolloProvider } from '@apollo/client';
+import { isLoggedIn } from './utils/auth';
 
-const HomePage: React.FC = () => (
-  <div className="App-header">
-    <Link to="/login" className="App-button">Go to Login Page</Link>
-  </div>
-);
+export const HomePage: React.FC = () => {
+  const navigate = useNavigate();
 
-function App() {
+  useEffect(() => {
+    if (!isLoggedIn()) {
+      navigate('/login');
+    }
+  }, [navigate]);
+
+  return (
+    <div className="App-header">
+      <Link to="/login" className="App-button">Go to Login Page</Link>
+    </div>
+  );
+};
+
+export function App() {
   return (
     <ApolloProvider client={client}>
       <Router>

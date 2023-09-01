@@ -1,10 +1,29 @@
-import { SECRET_KEY } from "../config";
+import jwtDecode from 'jwt-decode';
 
-export const encryptData = (data: string) => {
-    return CryptoJS.AES.encrypt(data, SECRET_KEY).toString();
-};
+export function isLoggedIn(): boolean {
+    const token = localStorage.getItem('token');
 
-export const decryptData = (encryptedData: string) => {
-    const bytes = CryptoJS.AES.decrypt(encryptedData, SECRET_KEY);
-    return bytes.toString(CryptoJS.enc.Utf8);
-};
+    if (!token) return false;
+
+    try {
+        const decodedToken: any = jwtDecode(token);
+        const currentTime = Date.now() / 1000;
+
+        return decodedToken.exp > currentTime;
+    } catch (err) {
+        console.error('Error decoding the token', err);
+        return false;
+    }
+}
+
+export function decodeUser() {
+    const token = localStorage.getItem('token');
+    if (!token) return null;
+
+    try {
+        return jwtDecode(token);
+    } catch (err) {
+        console.error('Error decoding the token', err);
+        return null;
+    }
+}
