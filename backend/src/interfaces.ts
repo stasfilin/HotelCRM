@@ -8,7 +8,7 @@ export enum RoomType {
 export enum UserRole {
     CUSTOMER = "CUSTOMER",
     ADMIN = "ADMIN"
-  }
+}
 
 export interface Room {
     id: number;
@@ -16,7 +16,7 @@ export interface Room {
     price: number;
     booked: boolean;
 }
-  
+
 export interface User {
     id: number;
     email: string;
@@ -24,7 +24,7 @@ export interface User {
     fullName?: string | null;
     role: UserRole;
 }
-  
+
 export interface Booking {
     id: number;
     roomId: number;
@@ -32,12 +32,12 @@ export interface Booking {
     startDate: Date;
     endDate: Date;
 }
-  
+
 export interface AuthPayload {
     token: string;
     user: User;
 }
-  
+
 export interface Context {
     user?: User;
 }

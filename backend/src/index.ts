@@ -1,8 +1,8 @@
 import { ApolloServer, AuthenticationError } from 'apollo-server';
 import jwt from 'jsonwebtoken';
 import { resolvers } from './resolvers';
-import {typeDefs} from './graphql/schema'
-import {JWT_SECRET, port} from './config'
+import { typeDefs } from './graphql/schema'
+import { JWT_SECRET, port } from './config'
 
 const server = new ApolloServer({
     typeDefs,
@@ -16,7 +16,7 @@ const server = new ApolloServer({
         }
 
         try {
-            const user = jwt.verify(token, JWT_SECRET) as any; 
+            const user = jwt.verify(token, JWT_SECRET) as any;
             return { user };
         } catch (err) {
             if (err instanceof Error) {

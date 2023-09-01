@@ -1,5 +1,4 @@
 module.exports = {
-    preset: 'ts-jest',
-    rootDir: './',
-  };
-  
+  preset: 'ts-jest',
+  rootDir: './',
+};
