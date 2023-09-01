@@ -8,6 +8,8 @@ import {
 import './App.css';
 
 import { LoginPage } from './LoginPage'
+import { client } from './apolloClient';
+import { ApolloProvider } from '@apollo/client';
 
 const HomePage: React.FC = () => (
   <div className="App-header">
@@ -17,14 +19,16 @@ const HomePage: React.FC = () => (
 
 function App() {
   return (
-    <Router>
-      <div className="App">
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/login" element={<LoginPage />} />
-        </Routes>
-      </div>
-    </Router>
+    <ApolloProvider client={client}>
+      <Router>
+        <div className="App">
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/login" element={<LoginPage />} />
+          </Routes>
+        </div>
+      </Router>
+    </ApolloProvider>
   );
 }
 
