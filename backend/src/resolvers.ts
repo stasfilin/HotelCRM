@@ -2,10 +2,8 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { prisma } from './database';
 import { Room, User, Booking, Context, AuthPayload, UserRole, RoomType } from './interfaces';
-import { JWT_SECRET } from './config';
-import { ApolloError, UserInputError, AuthenticationError } from 'apollo-server';
-
-const SALT_ROUNDS = 10;
+import { JWT_SECRET, SALT_ROUNDS } from './config';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
 export const resolvers = {
     Room: {
@@ -152,21 +150,34 @@ export const resolvers = {
         },
 
         login: async (_: any, args: { email: string, password: string }): Promise<AuthPayload> => {
-            const user = await prisma.user.findFirst({ where: { email: args.email } });
-            
+            let user;
+            try {
+                user = await prisma.user.findFirst({ where: { email: args.email } });
+            } catch (err) {
+                if (err instanceof PrismaClientKnownRequestError) {
+                    console.error('Prisma error:', err.message);
+                    
+                    if (err.code === "P2021") {
+                        console.error('It seems the User table is missing in the database.');
+                    }
+                    throw new Error("INTERNAL_SERVER_ERROR");
+                }
+                console.error('Unexpected error during login:', err);
+                throw new Error("INTERNAL_SERVER_ERROR");
+            }
             if (!user) {
                 throw new Error("INVALID_CREDENTIALS");
             }
-
             const passwordValid = await bcrypt.compare(args.password, user.password);
+            
             if (!passwordValid) {
                 throw new Error("INVALID_CREDENTIALS");
             }
-
+        
             const token = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET, {
                 expiresIn: "1d"
             });
-
+        
             return {
                 token,
                 user: {
@@ -174,7 +185,7 @@ export const resolvers = {
                     role: user.role as UserRole
                 }
             };
-        },
+        }
 
     },
 }
