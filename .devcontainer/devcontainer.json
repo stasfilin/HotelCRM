@@ -1,24 +1,18 @@
 {
-	"name": "Node.js & TypeScript",
-	"build": {
-		"dockerfile": "Dockerfile",
-		"args": { 
-			"VARIANT": "20-bullseye"
-		}
-	},
-	"customizations": {
-		"vscode": {
-			"extensions": [
-				"dbaeumer.vscode-eslint"
-			]
-		}
-	},
-	"forwardPorts": [1234, 5678],
-	"remoteUser": "node",
-
-	"runArgs": ["--init", "--privileged"],
-	"overrideCommand": false,
+	"name": "HotelCRM",
+	"image": "mcr.microsoft.com/devcontainers/universal:2",
 	"features": {
 		"ghcr.io/devcontainers/features/docker-in-docker:2": {}
+	},
+	"runArgs": ["--privileged"],
+	"mounts": [
+	  "type=bind,src=/var/run/docker.sock,dst=/var/run/docker.sock"
+	],
+	"customizations": {
+	  "vscode": {
+		"extensions": [
+		  "ms-azuretools.vscode-docker"
+		]
+	  }
 	}
-}
+  }
