@@ -262,5 +262,220 @@ describe('Resolvers', () => {
 
     });
 
+    describe('createRoom', () => {
+      it('should fail if user is not authenticated', async () => {
+        await expect(resolvers.Mutation.createRoom({}, { type: RoomType.DELUXE, price: 100 }, {}))
+          .rejects.toThrow('UNAUTHENTICATED');
+      });
+
+      it('should fail if user is not an admin', async () => {
+        const nonAdminUser: User = {
+          id: 2,
+          email: 'test2@email.com',
+          password: 'hashedPasswordForTest',
+          fullName: 'Jane Doe',
+          role: UserRole.CUSTOMER
+        };
+
+        await expect(resolvers.Mutation.createRoom({}, { type: RoomType.DELUXE, price: 100 }, { user: nonAdminUser }))
+          .rejects.toThrow('INSUFFICIENT_PERMISSIONS');
+      });
+
+      it('should create a room if user is an admin', async () => {
+        const adminUser: User = {
+          id: 1,
+          email: 'admin@email.com',
+          password: 'hashedPasswordForAdmin',
+          fullName: 'Admin User',
+          role: UserRole.ADMIN
+        };
+
+        const newRoom: Room = {
+          id: 3,
+          type: RoomType.DELUXE,
+          price: 100,
+          booked: false
+        };
+
+        (prisma.room.create as jest.Mock).mockResolvedValue(newRoom);
+
+        const result = await resolvers.Mutation.createRoom({}, { type: RoomType.DELUXE, price: 100 }, { user: adminUser });
+        expect(result).toEqual(newRoom);
+      });
+    });
+
+    describe('updateRoom', () => {
+      it('should fail if user is not an admin', async () => {
+        const nonAdminUser: User = {
+          id: 2,
+          email: 'test2@email.com',
+          password: 'hashedPasswordForTest',
+          fullName: 'Jane Doe',
+          role: UserRole.CUSTOMER
+        };
+
+        await expect(resolvers.Mutation.updateRoom({}, { id: 1, type: RoomType.DELUXE, price: 150 }, { user: nonAdminUser }))
+          .rejects.toThrow('INSUFFICIENT_PERMISSIONS');
+      });
+
+      it('should throw an error if the room is not found', async () => {
+        const adminUser: User = {
+          id: 1,
+          email: 'admin@email.com',
+          password: 'hashedPasswordForAdmin',
+          fullName: 'Admin User',
+          role: UserRole.ADMIN
+        };
+
+        prismaMock.room.findFirst.mockResolvedValue(null);
+
+        await expect(resolvers.Mutation.updateRoom({}, { id: 999, type: RoomType.DELUXE, price: 150 }, { user: adminUser }))
+          .rejects.toThrow('ROOM_NOT_FOUND');
+      });
+
+      it('should successfully update the room', async () => {
+        const adminUser: User = {
+          id: 1,
+          email: 'admin@email.com',
+          password: 'hashedPasswordForAdmin',
+          fullName: 'Admin User',
+          role: UserRole.ADMIN
+        };
+
+        const updatedRoom: Room = {
+          id: 1,
+          type: RoomType.DELUXE,
+          price: 150,
+          booked: false
+        };
+
+        prismaMock.room.findFirst.mockResolvedValue(updatedRoom);
+        prismaMock.room.update.mockResolvedValue(updatedRoom);
+
+        const result = await resolvers.Mutation.updateRoom({}, { id: 1, type: RoomType.DELUXE, price: 150 }, { user: adminUser });
+        expect(result).toEqual(updatedRoom);
+      });
+    });
+
+    describe('deleteRoom', () => {
+      it('should fail if user is not an admin', async () => {
+        const nonAdminUser: User = {
+          id: 2,
+          email: 'test2@email.com',
+          password: 'hashedPasswordForTest',
+          fullName: 'Jane Doe',
+          role: UserRole.CUSTOMER
+        };
+
+        await expect(resolvers.Mutation.deleteRoom({}, { id: 1 }, { user: nonAdminUser }))
+          .rejects.toThrow('INSUFFICIENT_PERMISSIONS');
+      });
+
+      it('should throw an error if the room is not found', async () => {
+        const adminUser: User = {
+          id: 1,
+          email: 'admin@email.com',
+          password: 'hashedPasswordForAdmin',
+          fullName: 'Admin User',
+          role: UserRole.ADMIN
+        };
+
+        prismaMock.room.findFirst.mockResolvedValue(null);
+
+        await expect(resolvers.Mutation.deleteRoom({}, { id: 999 }, { user: adminUser }))
+          .rejects.toThrow('ROOM_NOT_FOUND');
+      });
+
+      it('should successfully delete the room', async () => {
+        const adminUser: User = {
+          id: 1,
+          email: 'admin@email.com',
+          password: 'hashedPasswordForAdmin',
+          fullName: 'Admin User',
+          role: UserRole.ADMIN
+        };
+
+        const roomToBeDeleted: Room = {
+          id: 1,
+          type: RoomType.DELUXE,
+          price: 150,
+          booked: false
+        };
+
+        prismaMock.room.findFirst.mockResolvedValue(roomToBeDeleted);
+        prismaMock.room.delete.mockResolvedValue(roomToBeDeleted);
+
+        const result = await resolvers.Mutation.deleteRoom({}, { id: 1 }, { user: adminUser });
+        expect(result).toEqual(roomToBeDeleted);
+      });
+    });
+
+    describe('cancelBooking', () => {
+
+      it('should throw an error if the booking is not found', async () => {
+        const user: User = {
+          id: 2,
+          email: 'test2@email.com',
+          password: 'hashedPasswordForTest',
+          fullName: 'Jane Doe',
+          role: UserRole.CUSTOMER
+        };
+
+        prismaMock.booking.findFirst.mockResolvedValue(null);
+        prismaMock.booking.delete.mockResolvedValue(null);
+
+        await expect(resolvers.Mutation.cancelBooking({}, { id: 999 }, { user }))
+          .rejects.toThrow('BOOKING_NOT_FOUND');
+      });
+
+      it('should successfully cancel the booking if user is the owner', async () => {
+        const user: User = {
+          id: 2,
+          email: 'test2@email.com',
+          password: 'hashedPasswordForTest',
+          fullName: 'Jane Doe',
+          role: UserRole.CUSTOMER
+        };
+
+        const booking: Booking = {
+          id: 1,
+          roomId: 2,
+          userId: 2,
+          startDate: new Date('2023-09-01T10:20:30Z'),
+          endDate: new Date('2023-09-05T10:20:30Z')
+        };
+
+        prismaMock.booking.findFirst.mockResolvedValue(booking);
+        prismaMock.booking.delete.mockResolvedValue(booking);
+
+        const result = await resolvers.Mutation.cancelBooking({}, { id: 1 }, { user });
+        expect(result).toEqual(booking);
+      });
+
+      it('should successfully cancel the booking if user is an admin', async () => {
+        const adminUser: User = {
+          id: 1,
+          email: 'admin@email.com',
+          password: 'hashedPasswordForAdmin',
+          fullName: 'Admin User',
+          role: UserRole.ADMIN
+        };
+
+        const booking: Booking = {
+          id: 1,
+          roomId: 2,
+          userId: 2,
+          startDate: new Date('2023-09-01T10:20:30Z'),
+          endDate: new Date('2023-09-05T10:20:30Z')
+        };
+
+        prismaMock.booking.findFirst.mockResolvedValue(booking);
+        prismaMock.booking.delete.mockResolvedValue(booking);
+
+        const result = await resolvers.Mutation.cancelBooking({}, { id: 1 }, { user: adminUser });
+        expect(result).toEqual(booking);
+      });
+    });
+
   });
 });

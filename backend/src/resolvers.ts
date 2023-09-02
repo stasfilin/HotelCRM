@@ -185,6 +185,108 @@ export const resolvers = {
                     role: user.role as UserRole
                 }
             };
+        },
+
+        createRoom: async (_: any, args: { type: RoomType, price: number }, context: Context) => {
+            if (!context.user) {
+                throw new Error('UNAUTHENTICATED');
+            }
+
+            if (context.user.role !== UserRole.ADMIN) {
+                throw new Error('INSUFFICIENT_PERMISSIONS');
+            }
+
+            try {
+                const newRoom = await prisma.room.create({
+                    data: {
+                        type: args.type,
+                        price: args.price,
+                        booked: false
+                    }
+                });
+                return newRoom;
+            } catch (error) {
+                throw new Error('DATABASE_ERROR');
+            }
+        },
+
+        updateRoom: async (_: any, args: { id: number, type?: RoomType, price?: number }, context: Context) => {
+            if (!context.user) {
+                throw new Error('UNAUTHENTICATED');
+            }
+
+            if (context.user.role !== UserRole.ADMIN) {
+                throw new Error('INSUFFICIENT_PERMISSIONS');
+            }
+
+            const room = await prisma.room.findFirst({ where: { id: args.id } });
+
+            if (!room) {
+                throw new Error('ROOM_NOT_FOUND');
+            }
+
+            try {
+                const updatedRoom = await prisma.room.update({
+                    where: { id: args.id },
+                    data: {
+                        type: args.type,
+                        price: args.price
+                    }
+                });
+                return updatedRoom;
+            } catch (error) {
+                throw new Error('DATABASE_ERROR');
+            }
+        },
+
+        deleteRoom: async (_: any, args: { id: number }, context: Context) => {
+            if (!context.user) {
+                throw new Error('UNAUTHENTICATED');
+            }
+
+            if (context.user.role !== UserRole.ADMIN) {
+                throw new Error('INSUFFICIENT_PERMISSIONS');
+            }
+
+            const room = await prisma.room.findFirst({ where: { id: args.id } });
+            if (!room) {
+                throw new Error('ROOM_NOT_FOUND');
+            }
+
+            try {
+                const deletedRoom = await prisma.room.delete({
+                    where: { id: args.id }
+                });
+                return deletedRoom;
+            } catch (error) {
+                throw new Error('DATABASE_ERROR');
+            }
+        },
+
+        cancelBooking: async (_: any, args: { id: number }, context: Context) => {
+            if (!context.user) {
+                throw new Error('UNAUTHENTICATED');
+            }
+
+            const booking = await prisma.booking.findFirst({ where: { id: args.id } });
+
+            if (!booking) {
+                throw new Error('BOOKING_NOT_FOUND');
+            }
+
+            if (context.user.id !== booking.userId && context.user.role !== UserRole.ADMIN) {
+                throw new Error('INSUFFICIENT_PERMISSIONS');
+            }
+
+            try {
+                const canceledBooking = await prisma.booking.delete({
+                    where: { id: args.id }
+                });
+
+                return canceledBooking;
+            } catch (error) {
+                throw new Error('DATABASE_ERROR');
+            }
         }
 
     },
