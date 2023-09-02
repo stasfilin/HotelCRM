@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@apollo/client';
+import { useTable, Column, Row, CellProps } from 'react-table';
 import { isLoggedIn, getCurrentUser } from '../../utils/auth';
 import { RoomType, UserRole } from '../../utils/enums';
 import { CREATE_ROOM_MUTATION, UPDATE_ROOM_MUTATION, DELETE_ROOM_MUTATION } from '../../graphql/mutations';
 import { AVAILABLE_ROOMS_QUERY } from '../../graphql/queries';
-import { Room } from '../../utils/types';
 import '../../styles/RoomsPage.css';
+import { Room } from '../../utils/types';
 
 export const RoomsPage: React.FC = () => {
     const navigate = useNavigate();
@@ -25,7 +26,15 @@ export const RoomsPage: React.FC = () => {
         refetchQueries: [{ query: AVAILABLE_ROOMS_QUERY }]
     });
 
-    const [deleteRoom] = useMutation(DELETE_ROOM_MUTATION);
+    const [deleteRoom] = useMutation(DELETE_ROOM_MUTATION, {
+        onCompleted: () => {
+            setFeedback({ message: 'Room successfully deleted!', type: 'success' });
+        },
+        onError: (err) => {
+            setFeedback({ message: err.message, type: 'error' });
+        },
+        refetchQueries: [{ query: AVAILABLE_ROOMS_QUERY }]
+    });
 
     useEffect(() => {
         if (!isLoggedIn() || !user || user.role !== UserRole.ADMIN) {
@@ -58,6 +67,38 @@ export const RoomsPage: React.FC = () => {
         }
     };
 
+    const handleDelete = async (id: string) => {
+        try {
+            await deleteRoom({ variables: { id } });
+        } catch (err) { }
+    };
+
+    const columns: Column<Room>[] = React.useMemo(() => [
+        { Header: 'ID', accessor: 'id' as const },
+        { Header: 'Type', accessor: 'type' as const },
+        { Header: 'Price', accessor: 'price' as const },
+        {
+            Header: 'Booked',
+            accessor: 'booked' as const,
+            Cell: ({ value }: CellProps<Room, boolean>) => <>{value.toString()}</>
+        },
+        {
+            Header: 'Actions',
+            id: 'actions',
+            accessor: (row: Room) => row.id,
+            Cell: ({ row }: { row: Row<Room> }) => (
+                <div className="table-action-buttons">
+                    <button className="edit-button" onClick={() => { setSelectedRoom(row.original); setShowModal(true); }}>Edit</button>
+                    <button className="delete-button" onClick={() => handleDelete(row.original.id)}>Delete</button>
+                </div>
+            ),
+        }
+    ], []);
+
+    const tableInstance = useTable({ columns, data: data?.availableRooms || [] });
+
+    const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } = tableInstance;
+
     if (loading) return <p>Loading...</p>;
     if (error) return <p>Error: {error.message}</p>;
 
@@ -85,31 +126,27 @@ export const RoomsPage: React.FC = () => {
                     </div>
                 </form>
             )}
-            <table className="admin-table">
+            <table className="admin-table" {...getTableProps()}>
                 <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Type</th>
-                        <th>Price</th>
-                        <th>Booked</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {data && data.availableRooms.map(room => (
-                        <tr key={room.id}>
-                            <td>{room.id}</td>
-                            <td>{room.type}</td>
-                            <td>{room.price}</td>
-                            <td>{room.booked.toString()}</td>
-                            <td>
-                                <div className="table-action-buttons">
-                                    <button className="edit-button" onClick={() => { setSelectedRoom(room); setShowModal(true); }}>Edit</button>
-                                    <button className="delete-button" onClick={() => deleteRoom({ variables: { id: room.id } })}>Delete</button>
-                                </div>
-                            </td>
+                    {headerGroups.map(headerGroup => (
+                        <tr {...headerGroup.getHeaderGroupProps()}>
+                            {headerGroup.headers.map(column => (
+                                <th {...column.getHeaderProps()}>{column.render('Header')}</th>
+                            ))}
                         </tr>
                     ))}
+                </thead>
+                <tbody {...getTableBodyProps()}>
+                    {rows.map(row => {
+                        prepareRow(row);
+                        return (
+                            <tr {...row.getRowProps()}>
+                                {row.cells.map(cell => (
+                                    <td {...cell.getCellProps()}>{cell.render('Cell')}</td>
+                                ))}
+                            </tr>
+                        )
+                    })}
                 </tbody>
             </table>
             <button className="admin-button" onClick={() => { setShowModal(true); setSelectedRoom(null); }}>Add New Room</button>
