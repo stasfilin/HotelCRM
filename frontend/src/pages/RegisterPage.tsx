@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useMutation } from "@apollo/client";
-import { REGISTER_MUTATION } from "../graph";
+import { REGISTER_MUTATION } from "../graphql/mutations";
 import { isLoggedIn } from "../utils/auth";
 import { useNavigate } from 'react-router-dom';
 

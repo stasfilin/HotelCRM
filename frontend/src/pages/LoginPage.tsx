@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useMutation } from "@apollo/client";
-import { LOGIN_MUTATION } from "../graph";
+import { LOGIN_MUTATION } from "../graphql/mutations";
 import { isLoggedIn } from "../utils/auth";
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -38,7 +38,7 @@ export const LoginPage: React.FC = () => {
             <form className="login-form" onSubmit={handleSubmit}>
                 <input
                     type="text"
-                    placeholder="Username"
+                    placeholder="Email"
                     className="login-input"
                     required
                 />
