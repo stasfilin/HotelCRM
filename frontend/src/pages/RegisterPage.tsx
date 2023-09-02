@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useMutation } from "@apollo/client";
-import { REGISTER_MUTATION } from "./graph";
-import { isLoggedIn } from "./utils/auth";
+import { REGISTER_MUTATION } from "../graph";
+import { isLoggedIn } from "../utils/auth";
 import { useNavigate } from 'react-router-dom';
 
 export const RegisterPage: React.FC = () => {

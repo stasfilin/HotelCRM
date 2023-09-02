@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useMutation } from "@apollo/client";
-import { LOGIN_MUTATION } from "./graph";
-import { isLoggedIn } from "./utils/auth";
+import { LOGIN_MUTATION } from "../graph";
+import { isLoggedIn } from "../utils/auth";
 import { Link, useNavigate } from 'react-router-dom';
 
 export const LoginPage: React.FC = () => {

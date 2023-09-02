@@ -6,12 +6,12 @@ import {
   Link,
   useNavigate
 } from 'react-router-dom';
-import './App.css';
+import '../App.css';
 
 import { LoginPage } from './LoginPage';
-import { client } from './apolloClient';
+import { client } from '../apolloClient';
 import { ApolloProvider } from '@apollo/client';
-import { isLoggedIn } from './utils/auth';
+import { isLoggedIn } from '../utils/auth';
 import RegisterPage from './RegisterPage';
 
 export const HomePage: React.FC = () => {
