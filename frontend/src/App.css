@@ -1,92 +1,73 @@
 .App {
-  font-family: Arial, sans-serif;
+  font-family: 'Arial', sans-serif;
+  background-color: #f4f4f4;
 }
 
 .App-header {
-  height: 100vh;
+  min-height: 100vh;
+  padding: 50px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background-color: #282c34;
+  background-color: #333;
   color: white;
 }
 
-.App-button {
-  margin-top: 20px;
+.App-button,
+.login-button,
+.admin-button,
+.edit-button,
+.delete-button,
+.cancel-button {
   padding: 10px 20px;
   border: none;
   border-radius: 5px;
-  background-color: #61dafb;
+  font-size: 1rem;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: background-color 0.2s, transform 0.1s;
 }
 
-.App-button:hover {
-  background-color: #4fa8d6;
+.App-button:hover,
+.login-button:hover,
+.admin-button:hover,
+.edit-button:hover,
+.delete-button:hover,
+.cancel-button:hover {
+  transform: scale(1.05);
 }
 
-.login-form {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  width: 300px;
-}
-
-.login-input {
-  padding: 10px;
-  border: none;
-  border-radius: 5px;
-}
-
-.login-button {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  background-color: #61dafb;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.login-button:hover {
-  background-color: #4fa8d6;
-}
-
+.room-form,
+.login-form,
 .register-form {
   display: flex;
   flex-direction: column;
+  gap: 20px;
+  padding: 20px;
+  background-color: rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
   gap: 10px;
-  width: 300px;
 }
 
-.register-input {
+.form-group label {
+  font-weight: bold;
+}
+
+.form-group select,
+.form-group input {
   padding: 10px;
-  border: none;
+  border: 1px solid #ddd;
   border-radius: 5px;
+  background-color: #fafafa;
 }
 
-.register-button {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  background-color: #61dafb;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.register-button:hover {
-  background-color: #4fa8d6;
-}
-
-.App-text-link {
-  color: #61dafb;
-  text-decoration: none;
-  cursor: pointer;
-  transition: color 0.2s;
-  margin-top: 20px;
-}
-
-.App-text-link:hover {
-  color: #4fa8d6;
-  text-decoration: underline;
+.form-buttons {
+  display: flex;
+  gap: 10px;
 }

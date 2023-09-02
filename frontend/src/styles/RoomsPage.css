@@ -1,0 +1,70 @@
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 30px;
+  background-color: rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.admin-table th,
+.admin-table td {
+  padding: 15px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  text-align: left;
+}
+
+.admin-table th {
+  background-color: #444;
+}
+
+.admin-table tr:last-child td {
+  border-bottom: none;
+}
+
+.admin-table tr:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.table-action-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.edit-button {
+  background-color: #61dafb;
+  color: white;
+}
+
+.delete-button {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.admin-button,
+.login-button,
+.App-button {
+  background-color: #61dafb;
+  color: white;
+}
+
+.cancel-button {
+  background-color: #f39c12;
+  color: white;
+}
+
+.feedback-error {
+  background-color: #e74c3c;
+  color: white;
+  padding: 10px 15px;
+  border-radius: 5px;
+  margin-top: 20px;
+}
+
+.feedback-success {
+  background-color: #27ae60;
+  color: white;
+  padding: 10px 15px;
+  border-radius: 5px;
+  margin-top: 20px;
+}

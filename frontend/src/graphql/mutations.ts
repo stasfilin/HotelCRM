@@ -25,3 +25,33 @@ export const REGISTER_MUTATION = gql`
         }
     }
 `;
+
+export const CREATE_ROOM_MUTATION = gql`
+  mutation CreateRoom($type: RoomType!, $price: Float!) {
+    createRoom(type: $type, price: $price) {
+      id
+      type
+      price
+      booked
+    }
+  }
+`;
+
+export const UPDATE_ROOM_MUTATION = gql`
+  mutation UpdateRoom($id: Int!, $type: RoomType, $price: Float) {
+    updateRoom(id: $id, type: $type, price: $price) {
+      id
+      type
+      price
+      booked
+    }
+  }
+`;
+
+export const DELETE_ROOM_MUTATION = gql`
+mutation DeleteRoom($id: Int!) {
+  deleteRoom(id: $id) {
+    id
+  }
+}
+`;
