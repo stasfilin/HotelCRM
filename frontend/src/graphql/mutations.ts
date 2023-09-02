@@ -38,7 +38,7 @@ export const CREATE_ROOM_MUTATION = gql`
 `;
 
 export const UPDATE_ROOM_MUTATION = gql`
-  mutation UpdateRoom($id: Int!, $type: RoomType, $price: Float) {
+  mutation UpdateRoom($id: ID!, $type: RoomType, $price: Float) {
     updateRoom(id: $id, type: $type, price: $price) {
       id
       type
@@ -49,7 +49,7 @@ export const UPDATE_ROOM_MUTATION = gql`
 `;
 
 export const DELETE_ROOM_MUTATION = gql`
-mutation DeleteRoom($id: Int!) {
+mutation DeleteRoom($id: ID!) {
   deleteRoom(id: $id) {
     id
   }

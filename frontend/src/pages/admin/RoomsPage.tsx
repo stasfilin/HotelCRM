@@ -69,9 +69,35 @@ export const RoomsPage: React.FC = () => {
 
     const handleDelete = async (id: string) => {
         try {
-            await deleteRoom({ variables: { id } });
-        } catch (err) { }
+            const roomId = parseInt(id, 10);
+
+            if (isNaN(roomId)) {
+                console.error('Invalid ID provided:', id);
+                return;
+            }
+
+            const variables = { id: roomId };
+
+            if (!DELETE_ROOM_MUTATION.loc) {
+                console.error('Mutation string not available');
+                return;
+            }
+
+            const mutationString = DELETE_ROOM_MUTATION.loc.source.body;
+            const operationName = 'DeleteRoom';
+
+            const requestDetails = {
+                operationName,
+                query: mutationString,
+                variables,
+            };
+
+            const response = await deleteRoom({ variables });
+
+        } catch (error) {
+        }
     };
+
 
     const columns: Column<Room>[] = React.useMemo(() => [
         { Header: 'ID', accessor: 'id' as const },

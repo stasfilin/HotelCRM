@@ -367,7 +367,7 @@ describe('Resolvers', () => {
           role: UserRole.CUSTOMER
         };
 
-        await expect(resolvers.Mutation.deleteRoom({}, { id: 1 }, { user: nonAdminUser }))
+        await expect(resolvers.Mutation.deleteRoom({}, { id: "1" }, { user: nonAdminUser }))
           .rejects.toThrow('INSUFFICIENT_PERMISSIONS');
       });
 
@@ -382,7 +382,7 @@ describe('Resolvers', () => {
 
         prismaMock.room.findFirst.mockResolvedValue(null);
 
-        await expect(resolvers.Mutation.deleteRoom({}, { id: 999 }, { user: adminUser }))
+        await expect(resolvers.Mutation.deleteRoom({}, { id: "999" }, { user: adminUser }))
           .rejects.toThrow('ROOM_NOT_FOUND');
       });
 
@@ -405,7 +405,7 @@ describe('Resolvers', () => {
         prismaMock.room.findFirst.mockResolvedValue(roomToBeDeleted);
         prismaMock.room.delete.mockResolvedValue(roomToBeDeleted);
 
-        const result = await resolvers.Mutation.deleteRoom({}, { id: 1 }, { user: adminUser });
+        const result = await resolvers.Mutation.deleteRoom({}, { id: "1" }, { user: adminUser });
         expect(result).toEqual(roomToBeDeleted);
       });
     });

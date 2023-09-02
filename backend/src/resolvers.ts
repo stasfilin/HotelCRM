@@ -210,7 +210,7 @@ export const resolvers = {
             }
         },
 
-        updateRoom: async (_: any, args: { id: number, type?: RoomType, price?: number }, context: Context) => {
+        updateRoom: async (_: any, args: { id: string | number, type?: RoomType, price?: number }, context: Context) => {
             if (!context.user) {
                 throw new Error('UNAUTHENTICATED');
             }
@@ -219,7 +219,12 @@ export const resolvers = {
                 throw new Error('INSUFFICIENT_PERMISSIONS');
             }
 
-            const room = await prisma.room.findFirst({ where: { id: args.id } });
+            const roomId = typeof args.id === 'string' ? parseInt(args.id, 10) : args.id;
+            if (isNaN(roomId)) {
+                throw new Error('INVALID_ID');
+            }
+
+            const room = await prisma.room.findFirst({ where: { id: roomId } });
 
             if (!room) {
                 throw new Error('ROOM_NOT_FOUND');
@@ -227,7 +232,7 @@ export const resolvers = {
 
             try {
                 const updatedRoom = await prisma.room.update({
-                    where: { id: args.id },
+                    where: { id: roomId },
                     data: {
                         type: args.type,
                         price: args.price
@@ -239,7 +244,7 @@ export const resolvers = {
             }
         },
 
-        deleteRoom: async (_: any, args: { id: number }, context: Context) => {
+        deleteRoom: async (_: any, args: { id: string }, context: Context) => {
             if (!context.user) {
                 throw new Error('UNAUTHENTICATED');
             }
@@ -248,14 +253,16 @@ export const resolvers = {
                 throw new Error('INSUFFICIENT_PERMISSIONS');
             }
 
-            const room = await prisma.room.findFirst({ where: { id: args.id } });
+            const numericId = parseInt(args.id, 10);
+            const room = await prisma.room.findFirst({ where: { id: numericId } });
+
             if (!room) {
                 throw new Error('ROOM_NOT_FOUND');
             }
 
             try {
                 const deletedRoom = await prisma.room.delete({
-                    where: { id: args.id }
+                    where: { id: numericId }
                 });
                 return deletedRoom;
             } catch (error) {
