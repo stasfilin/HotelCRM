@@ -1,29 +1,73 @@
+.App-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  background-color: #282c34;
+  color: white;
+  min-height: 100vh;
+}
+
+h1 {
+  margin-bottom: 20px;
+}
+
+.feedback-error,
+.feedback-success {
+  margin-bottom: 20px;
+  width: 100%;
+  text-align: center;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.room-form {
+  width: 100%;
+  max-width: 500px;
+  margin: 20px 0;
+  padding: 20px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 5px;
+  box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.2);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  font-weight: bold;
+  color: white;
+  margin-bottom: 5px;
+}
+
+.form-buttons {
+  display: flex;
+  gap: 10px;
+}
+
 .admin-table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 30px;
-  background-color: rgba(0, 0, 0, 0.1);
-  border-radius: 10px;
-  overflow: hidden;
+  margin-bottom: 20px;
 }
 
 .admin-table th,
 .admin-table td {
-  padding: 15px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 10px 15px;
+  border: 1px solid white;
   text-align: left;
 }
 
 .admin-table th {
-  background-color: #444;
-}
-
-.admin-table tr:last-child td {
-  border-bottom: none;
+  background-color: #555;
 }
 
 .admin-table tr:hover {
-  background-color: rgba(255, 255, 255, 0.08);
+  background-color: rgba(255, 255, 255, 0.05);
 }
 
 .table-action-buttons {
@@ -31,40 +75,48 @@
   gap: 10px;
 }
 
-.edit-button {
+.admin-button {
+  padding: 10px 20px;
   background-color: #61dafb;
-  color: white;
-}
-
-.delete-button {
-  background-color: #e74c3c;
-  color: white;
-}
-
-.admin-button,
-.login-button,
-.App-button {
-  background-color: #61dafb;
-  color: white;
-}
-
-.cancel-button {
-  background-color: #f39c12;
-  color: white;
-}
-
-.feedback-error {
-  background-color: #e74c3c;
-  color: white;
-  padding: 10px 15px;
+  border: none;
   border-radius: 5px;
-  margin-top: 20px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  color: white;
 }
 
-.feedback-success {
-  background-color: #27ae60;
+.admin-button:hover {
+  background-color: #4fa8d6;
+}
+
+.room-button {
+  padding: 10px 20px;
+  background-color: #4CAF50;
   color: white;
-  padding: 10px 15px;
+  border: none;
   border-radius: 5px;
-  margin-top: 20px;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.2s;
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.room-button:hover {
+  background-color: #45a049;
+  transform: translateY(-1px);
+}
+
+.room-button:active {
+  transform: translateY(1px);
+}
+
+.room-input {
+  width: 100%;
+  padding: 10px 15px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-top: 5px;
+}
+
+.room-form .form-group {
+  margin-bottom: 15px;
 }

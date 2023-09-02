@@ -69,7 +69,7 @@ export const RoomsPage: React.FC = () => {
                 <form onSubmit={handleSubmit} className="room-form">
                     <div className="form-group">
                         <label>Type:</label>
-                        <select name="type" className="login-input" defaultValue={selectedRoom ? selectedRoom.type : ''}>
+                        <select name="type" className="room-input" defaultValue={selectedRoom ? selectedRoom.type : ''}>
                             {Object.values(RoomType).map(roomType => (
                                 <option key={roomType} value={roomType}>{roomType}</option>
                             ))}
@@ -77,10 +77,10 @@ export const RoomsPage: React.FC = () => {
                     </div>
                     <div className="form-group">
                         <label>Price:</label>
-                        <input className="login-input" type="number" name="price" defaultValue={selectedRoom ? selectedRoom.price.toString() : ''} />
+                        <input className="room-input" type="number" name="price" defaultValue={selectedRoom ? selectedRoom.price.toString() : ''} />
                     </div>
                     <div className="form-buttons">
-                        <button className="login-button" type="submit">Submit</button>
+                        <button className="room-button" type="submit">Submit</button>
                         <button className="cancel-button" onClick={() => { setShowModal(false); setSelectedRoom(null); }}>Cancel</button>
                     </div>
                 </form>

@@ -50,7 +50,6 @@ export function getCurrentUser(): { id: any, email: any, role?: UserRole } | nul
     try {
         const user = jwtDecode(token) as { userId: any, email: any, role?: UserRole };
 
-        console.log(user)
         return {
             id: user.userId,
             email: user.email,
