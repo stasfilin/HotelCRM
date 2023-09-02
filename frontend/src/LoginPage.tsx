@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useMutation } from "@apollo/client";
 import { LOGIN_MUTATION } from "./graph";
 import { isLoggedIn } from "./utils/auth";
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 export const LoginPage: React.FC = () => {
     const [login, { loading, error, data }] = useMutation(LOGIN_MUTATION);
@@ -50,6 +50,7 @@ export const LoginPage: React.FC = () => {
                 />
                 <button type="submit" className="login-button">Login</button>
             </form>
+            <Link to="/register" className="App-text-link">Go to Register Page</Link>
         </div>
     );
 };
