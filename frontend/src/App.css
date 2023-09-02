@@ -51,3 +51,42 @@
 .login-button:hover {
   background-color: #4fa8d6;
 }
+
+.register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 300px;
+}
+
+.register-input {
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+}
+
+.register-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  background-color: #61dafb;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.register-button:hover {
+  background-color: #4fa8d6;
+}
+
+.App-text-link {
+  color: #61dafb;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.2s;
+  margin-top: 20px;
+}
+
+.App-text-link:hover {
+  color: #4fa8d6;
+  text-decoration: underline;
+}
