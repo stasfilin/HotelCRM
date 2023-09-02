@@ -8,8 +8,8 @@
 
 ```sh
 # Clone the repo
-git clone [repository URL]
-cd [repository directory]
+git clone https://github.com/stasfilin/HotelCRM
+cd HotelCRM
 
 # Build and run
 docker-compose build
