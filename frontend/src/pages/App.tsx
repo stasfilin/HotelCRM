@@ -15,6 +15,8 @@ import { isLoggedIn } from '../utils/auth';
 import RegisterPage from './RegisterPage';
 import { AdminPage } from './admin/AdminPage';
 import { RoomsPage } from './admin/RoomsPage';
+import { CustomerPage } from './customer/CustomerPage';
+import { BookPage } from './customer/BookPage';
 
 export const HomePage: React.FC = () => {
   const navigate = useNavigate();
@@ -32,6 +34,10 @@ export const HomePage: React.FC = () => {
 
     <Link to="/admin" className="App-button">Go to Admin Page</Link>
     <Link to="/admin/rooms" className="App-button">Go to Admin Page: Rooms</Link>
+
+    <Link to="/customer" className="App-button">Go to Customer Page</Link>
+    <Link to="/customer/book" className="App-button">Go to Customer Page: Book</Link>
+    
     </div>
   );
 };
@@ -48,6 +54,9 @@ export function App() {
             
             <Route path="/admin" element={<AdminPage />} />
             <Route path="/admin/rooms" element={<RoomsPage />} />
+
+            <Route path="/customer" element={<CustomerPage />} />
+            <Route path="/customer/book" element={<BookPage />} />
           </Routes>
         </div>
       </Router>

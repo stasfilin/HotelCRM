@@ -53,29 +53,40 @@ export const resolvers = {
                 throw new Error('UNAUTHENTICATED');
             }
 
-            const roomToBook = await prisma.room.findFirst({ where: { id: args.roomId } });
+            const numericUserId = Number(args.userId);
+            const numericRoomId = Number(args.roomId);
+
+            if (isNaN(numericUserId) || isNaN(numericRoomId)) {
+                throw new Error('INVALID_ID_FORMAT');
+            }
+
+            const roomToBook = await prisma.room.findFirst({ where: { id: numericRoomId } });
+
             if (!roomToBook) {
                 throw new Error('ROOM_NOT_FOUND');
             }
 
+            const startDateISO = new Date(args.startDate).toISOString();
+            const endDateISO = new Date(args.endDate).toISOString();
+
             const existingBooking = await prisma.booking.findFirst({
                 where: {
-                    roomId: args.roomId,
+                    roomId: roomToBook.id,
                     OR: [
                         {
                             startDate: {
-                                lte: args.endDate
+                                lte: endDateISO
                             },
                             endDate: {
-                                gte: args.startDate
+                                gte: startDateISO
                             }
                         },
                         {
                             startDate: {
-                                gte: args.startDate
+                                gte: startDateISO
                             },
                             endDate: {
-                                lte: args.endDate
+                                lte: endDateISO
                             }
                         }
                     ]
@@ -90,10 +101,10 @@ export const resolvers = {
             try {
                 newBooking = await prisma.booking.create({
                     data: {
-                        roomId: args.roomId,
-                        userId: context.user.id,
-                        startDate: args.startDate,
-                        endDate: args.endDate,
+                        roomId: roomToBook.id,
+                        userId: numericUserId,
+                        startDate: startDateISO,
+                        endDate: endDateISO,
                     }
                 });
 

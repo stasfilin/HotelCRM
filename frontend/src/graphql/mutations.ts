@@ -55,3 +55,15 @@ mutation DeleteRoom($id: ID!) {
   }
 }
 `;
+
+export const BOOK_ROOM_MUTATION = gql`
+  mutation BookRoom($userId: ID!, $roomId: ID!, $startDate: String!, $endDate: String!) {
+    bookRoom(userId: $userId, roomId: $roomId, startDate: $startDate, endDate: $endDate) {
+      id
+      roomId
+      userId
+      startDate
+      endDate
+    }
+  }
+`;
