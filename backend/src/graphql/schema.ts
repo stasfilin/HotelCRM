@@ -56,5 +56,11 @@ export const typeDefs = gql`
     bookRoom(userId: ID!, roomId: ID!, startDate: String!, endDate: String!): Booking!
     register(email: String!, password: String!, fullName: String, role: UserRole!): AuthPayload!
     login(email: String!, password: String!): AuthPayload!
+
+    createRoom(type: RoomType!, price: Float!): Room!
+    updateRoom(id: ID!, type: RoomType, price: Float): Room!
+    deleteRoom(id: ID!): Room!
+
+    cancelBooking(id: ID!): Booking!
   }
 `;

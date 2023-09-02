@@ -1,8 +1,10 @@
 import React, { useEffect } from 'react';
 import { useMutation } from "@apollo/client";
-import { REGISTER_MUTATION } from "./graph";
-import { isLoggedIn } from "./utils/auth";
+import { REGISTER_MUTATION } from "../graphql/mutations";
+import { isLoggedIn } from "../utils/auth";
 import { useNavigate } from 'react-router-dom';
+import '../styles/RegisterPage.css';
+
 
 export const RegisterPage: React.FC = () => {
     const [register, { loading, error, data }] = useMutation(REGISTER_MUTATION);
@@ -35,28 +37,30 @@ export const RegisterPage: React.FC = () => {
     };
 
     return (
-        <div className="App-header">
-            <h1>Register</h1>
-            <form className="register-form" onSubmit={handleSubmit}>
-                <input
-                    type="text"
-                    placeholder="Full Name"
-                    className="register-input"
-                />
-                <input
-                    type="text"
-                    placeholder="Email"
-                    className="register-input"
-                    required
-                />
-                <input
-                    type="password"
-                    placeholder="Password"
-                    className="register-input"
-                    required
-                />
-                <button type="submit" className="register-button">Register</button>
-            </form>
+        <div className="register-page-container">
+            <div className="App-header">
+                <h1>Register</h1>
+                <form className="register-form" onSubmit={handleSubmit}>
+                    <input
+                        type="text"
+                        placeholder="Full Name"
+                        className="register-input"
+                    />
+                    <input
+                        type="text"
+                        placeholder="Email"
+                        className="register-input"
+                        required
+                    />
+                    <input
+                        type="password"
+                        placeholder="Password"
+                        className="register-input"
+                        required
+                    />
+                    <button type="submit" className="register-button">Register</button>
+                </form>
+            </div>
         </div>
     );
 };

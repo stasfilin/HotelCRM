@@ -53,29 +53,40 @@ export const resolvers = {
                 throw new Error('UNAUTHENTICATED');
             }
 
-            const roomToBook = await prisma.room.findFirst({ where: { id: args.roomId } });
+            const numericUserId = Number(args.userId);
+            const numericRoomId = Number(args.roomId);
+
+            if (isNaN(numericUserId) || isNaN(numericRoomId)) {
+                throw new Error('INVALID_ID_FORMAT');
+            }
+
+            const roomToBook = await prisma.room.findFirst({ where: { id: numericRoomId } });
+
             if (!roomToBook) {
                 throw new Error('ROOM_NOT_FOUND');
             }
 
+            const startDateISO = new Date(args.startDate).toISOString();
+            const endDateISO = new Date(args.endDate).toISOString();
+
             const existingBooking = await prisma.booking.findFirst({
                 where: {
-                    roomId: args.roomId,
+                    roomId: roomToBook.id,
                     OR: [
                         {
                             startDate: {
-                                lte: args.endDate
+                                lte: endDateISO
                             },
                             endDate: {
-                                gte: args.startDate
+                                gte: startDateISO
                             }
                         },
                         {
                             startDate: {
-                                gte: args.startDate
+                                gte: startDateISO
                             },
                             endDate: {
-                                lte: args.endDate
+                                lte: endDateISO
                             }
                         }
                     ]
@@ -90,10 +101,10 @@ export const resolvers = {
             try {
                 newBooking = await prisma.booking.create({
                     data: {
-                        roomId: args.roomId,
-                        userId: context.user.id,
-                        startDate: args.startDate,
-                        endDate: args.endDate,
+                        roomId: roomToBook.id,
+                        userId: numericUserId,
+                        startDate: startDateISO,
+                        endDate: endDateISO,
                     }
                 });
 
@@ -136,7 +147,7 @@ export const resolvers = {
                 }
             });
 
-            const token = jwt.sign({ userId: newUser.id, email: newUser.email }, JWT_SECRET, {
+            const token = jwt.sign({ userId: newUser.id, email: newUser.email, role: newUser.role }, JWT_SECRET, {
                 expiresIn: "1d"
             });
 
@@ -174,7 +185,7 @@ export const resolvers = {
                 throw new Error("INVALID_CREDENTIALS");
             }
 
-            const token = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET, {
+            const token = jwt.sign({ userId: user.id, email: user.email, role: user.role }, JWT_SECRET, {
                 expiresIn: "1d"
             });
 
@@ -185,6 +196,115 @@ export const resolvers = {
                     role: user.role as UserRole
                 }
             };
+        },
+
+        createRoom: async (_: any, args: { type: RoomType, price: number }, context: Context) => {
+            if (!context.user) {
+                throw new Error('UNAUTHENTICATED');
+            }
+
+            if (context.user.role !== UserRole.ADMIN) {
+                throw new Error('INSUFFICIENT_PERMISSIONS');
+            }
+
+            try {
+                const newRoom = await prisma.room.create({
+                    data: {
+                        type: args.type,
+                        price: args.price,
+                        booked: false
+                    }
+                });
+                return newRoom;
+            } catch (error) {
+                throw new Error('DATABASE_ERROR');
+            }
+        },
+
+        updateRoom: async (_: any, args: { id: string | number, type?: RoomType, price?: number }, context: Context) => {
+            if (!context.user) {
+                throw new Error('UNAUTHENTICATED');
+            }
+
+            if (context.user.role !== UserRole.ADMIN) {
+                throw new Error('INSUFFICIENT_PERMISSIONS');
+            }
+
+            const roomId = typeof args.id === 'string' ? parseInt(args.id, 10) : args.id;
+            if (isNaN(roomId)) {
+                throw new Error('INVALID_ID');
+            }
+
+            const room = await prisma.room.findFirst({ where: { id: roomId } });
+
+            if (!room) {
+                throw new Error('ROOM_NOT_FOUND');
+            }
+
+            try {
+                const updatedRoom = await prisma.room.update({
+                    where: { id: roomId },
+                    data: {
+                        type: args.type,
+                        price: args.price
+                    }
+                });
+                return updatedRoom;
+            } catch (error) {
+                throw new Error('DATABASE_ERROR');
+            }
+        },
+
+        deleteRoom: async (_: any, args: { id: string }, context: Context) => {
+            if (!context.user) {
+                throw new Error('UNAUTHENTICATED');
+            }
+
+            if (context.user.role !== UserRole.ADMIN) {
+                throw new Error('INSUFFICIENT_PERMISSIONS');
+            }
+
+            const numericId = parseInt(args.id, 10);
+            const room = await prisma.room.findFirst({ where: { id: numericId } });
+
+            if (!room) {
+                throw new Error('ROOM_NOT_FOUND');
+            }
+
+            try {
+                const deletedRoom = await prisma.room.delete({
+                    where: { id: numericId }
+                });
+                return deletedRoom;
+            } catch (error) {
+                throw new Error('DATABASE_ERROR');
+            }
+        },
+
+        cancelBooking: async (_: any, args: { id: number }, context: Context) => {
+            if (!context.user) {
+                throw new Error('UNAUTHENTICATED');
+            }
+
+            const booking = await prisma.booking.findFirst({ where: { id: args.id } });
+
+            if (!booking) {
+                throw new Error('BOOKING_NOT_FOUND');
+            }
+
+            if (context.user.id !== booking.userId && context.user.role !== UserRole.ADMIN) {
+                throw new Error('INSUFFICIENT_PERMISSIONS');
+            }
+
+            try {
+                const canceledBooking = await prisma.booking.delete({
+                    where: { id: args.id }
+                });
+
+                return canceledBooking;
+            } catch (error) {
+                throw new Error('DATABASE_ERROR');
+            }
         }
 
     },

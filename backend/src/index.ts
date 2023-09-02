@@ -26,9 +26,18 @@ const server = new ApolloServer({
             throw err;
         }
     },
-    debug: false
+    // formatError: (err) => {
+    //     console.error('GraphQL Error:', err);
+    //     return err;
+    // },
+    // formatResponse: (response, requestContext) => {
+    //     console.log('GraphQL Request:', requestContext.request.query);
+    //     console.log('Variables:', requestContext.request.variables);
+    //     console.log('GraphQL Response:', response);
+    //     return response;
+    // },
+    debug: true
 });
-
 
 server.listen({ port })
     .then(({ url }) => {
