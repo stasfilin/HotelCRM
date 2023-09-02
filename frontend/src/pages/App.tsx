@@ -13,6 +13,7 @@ import { client } from '../apolloClient';
 import { ApolloProvider } from '@apollo/client';
 import { isLoggedIn } from '../utils/auth';
 import RegisterPage from './RegisterPage';
+import { AdminPage } from './AdminPage';
 
 export const HomePage: React.FC = () => {
   const navigate = useNavigate();
@@ -27,6 +28,7 @@ export const HomePage: React.FC = () => {
     <div className="App-header">
     <Link to="/login" className="App-button">Go to Login Page</Link>
     <Link to="/register" className="App-button">Go to Register Page</Link>
+    <Link to="/admin" className="App-button">Go to Admin Page</Link>
     </div>
   );
 };
@@ -40,6 +42,7 @@ export function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/admin" element={<AdminPage />} />
           </Routes>
         </div>
       </Router>
